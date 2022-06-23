@@ -22,37 +22,33 @@
                 color: 'red'
             },
 
-            tooltip: {
-                trigger: 'item', //触发类型
-                // trigger:'axis'
-                formatter: (value) => {
-                    return value.name
-                }
-            },
-            toolbox: {
-                feature: {
-                    saveAsImage: {}, //导出图片
-                    dataView: {}, //数据视图
-                    restore: {}, //重置
-                    dataZoom: {}, //区域缩放
-                    magicType: {
-                        type: ["bar", "line"]
-                    }
-                }
-            },
-            legend: {
-                data: ['销量', '件数']
-            },
+
+
             xAxis: {
                 type: 'category', //类目轴
-                data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+                data: ['1月', '2月', '3月', '4月', '5月', '6月']
             },
             yAxis: {
                 type: 'value'
             },
             series: [{
                 name: '销量',
-                type: 'bar',
+                type: 'line',
+                smooth: true,
+                lineStyle: {
+                    color: 'green',
+                    type: 'dashed',
+                },
+                markArea: {
+                    data: [
+                        [{
+                            xAxis: '1月'
+                        }, {
+                            xAxis: '2月'
+                        }],
+
+                    ]
+                },
                 markPoint: {
                     data: [{
                         type: 'max',
@@ -76,7 +72,11 @@
                 data: [5, 20, 36, 10, 10, 20]
             }, {
                 name: '件数',
+                smooth: true,
                 type: 'line',
+                areaStyle: {
+                    color: 'pink'
+                },
                 data: [15, 25, 36, 20, 40, 30]
             }]
         };
