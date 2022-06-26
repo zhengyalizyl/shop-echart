@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <script src="../lib/echarts.js"></script>
+</head>
+
+<body>
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        const myChart = echarts.init(document.getElementById('main'));
+
+        const pieData = [{
+                    name: '淘宝',
+                    value: '11231'
+                }, {
+                    name: '京东',
+                    value: '22673'
+                }, {
+                    name: '唯品会',
+                    value: '6123'
+                }, {
+                    name: '1号店',
+                    value: '8989'
+                }, {
+                    name: '聚美优品',
+                    value: '6700'
+                }
+
+            ]
+            // 指定图表的配置项和数据
+        const option = {
+
+            series: [{
+                type: 'pie',
+                data: pieData,
+                label: {
+                    show: true,
+                    formatter: function(value) {
+                        return `${value.name}平台，花费了${value.value}，占比${value.percent}`
+                    }
+                },
+                // radius: '20%', //百分比参照的是宽度和高度中较小的那一部分的一半来进行百分比设置
+                // radius: ['50%', '75%'], //50%代表内部圆环的半径，75%代表外部圆环的半径
+                roseType: 'radius', //南丁格尔图 饼图的每个区域的半径随着数值发生改变
+                // selectedMode: 'single', //选中的效果，能够将选中的区域偏离远点一小段距离
+                selectMode: 'multiple',
+                selectOffset: 10
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
+</body>
+
+</html>
