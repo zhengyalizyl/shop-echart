@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="../lib/jquery.js"></script>
+    <script src="../lib/echarts.js"></script>
+</head>
+
+<body>
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        const myChart = echarts.init(document.getElementById('main'), null, {
+            rendered: 'canvas',
+            useDirtyRect: false
+        });
+        $.get('../json/map/anhui.json', function(res) {
+            console.log(res)
+            echarts.registerMap('anhuiMap', res);
+            // 指定图表的配置项和数据
+            const option = {
+                geo: {
+                    type: 'map',
+                    map: 'anhuiMap',
+                    roam: true, //设置允许缩放以及拖动的效果
+                    label: {
+                        show: true //展示标签
+                    },
+                    zoom: 1.2, //设置初始化的缩放比例
+                    center: [117.043551, 30.50883] //设置地图中心点的坐标
+                }
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+        })
+
+        window.addEventListener('resize', myChart.resize);
+    </script>
+</body>
+
+</html>

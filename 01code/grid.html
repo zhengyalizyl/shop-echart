@@ -75,7 +75,8 @@
                 data: yDataArr
             }]
         }
-        mCharts.setOption(option)
+        mCharts.setOption(option);
+        window.addEventListener('resize', myChart.resize);
     </script>
 </body>
 
