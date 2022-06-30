@@ -16,6 +16,10 @@
         const xDataArr = ['张三', '李四', '王五', '闰土', '小明', '茅台', '二妞', '大强']
         const yDataArr = [88, 92, 63, 77, 94, 80, 72, 86]
         const option = {
+            title: {
+                text: 'grid'
+            },
+            animation: true,
             dataZoom: [{
                 type: 'slider', //滑块
                 // type: 'inside'//鼠标缩放
@@ -49,8 +53,29 @@
                 position: 'right'
             },
             series: [{
+                itemStyle: {
+                    color: {
+                        type: 'linear',
+                        x: 0,
+                        y: 0,
+                        x2: 0,
+                        y2: 1,
+                        colorStops: [{
+                            offset: 0,
+                            color: 'red'
+                        }, {
+                            offset: 1,
+                            color: 'blue'
+                        }]
+                    }
+                },
                 name: '语文',
                 type: 'bar',
+                emphasis: {
+                    itemStyle: {
+                        color: 'yellow'
+                    }
+                },
                 markPoint: {
                     data: [{
                         type: 'max',
