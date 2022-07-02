@@ -1,0 +1,33 @@
+{
+    "name": "shop-echart",
+    "version": "1.0.0",
+    "main": "index.js",
+    "description": "https://github.com/zhengyalizyl/shop-echart.git",
+    "directories": {
+        "lib": "lib"
+    },
+    "scripts": {
+        "start": "nodemon backend/app.js",
+        "server": "nodemon backend/app.js",
+        "client": "npm start --prefix fontend",
+        "dev": "concurrently \"npm run server\" \"cross-env npm run client \" "
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/zhengyalizyl/shop-echart.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/zhengyalizyl/shop-echart/issues"
+    },
+    "homepage": "https://github.com/zhengyalizyl/shop-echart#readme",
+    "dependencies": {
+        "koa": "^2.13.4",
+        "nodemon": "^2.0.18"
+    },
+    "devDependencies": {
+        "concurrently": "^7.2.2",
+        "cross-env": "^7.0.3"
+    }
+}
