@@ -1,11 +1,16 @@
-import logo from './logo.svg';
-import './App.css';
+import {BrowserRouter,Routes,Route}  from 'react-router-dom'
+import SellerPage from "./pages/SellerPage";
+import TrendPage from './pages/TrendPage';
 
 function App() {
   return (
-    <div className="App">
-      aa
-    </div>
+   <BrowserRouter>
+     <Routes>
+       <Route path='/' element={<TrendPage/>}> </Route>
+       <Route path='/seller' element={<SellerPage/>}> </Route>
+       <Route path='/trend' element={<TrendPage/>}> </Route>
+     </Routes>
+   </BrowserRouter>
   );
 }
 
