@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTrend } from '../actions/trendActions';
+import chalk from '../utils/chalk'
 
 export default function Trend() {
     const trendRef = useRef(null);
@@ -27,11 +28,15 @@ export default function Trend() {
     }, [chartInstance, trendList])
 
     const initChart = () => {
-        const mychart = echarts.init(trendRef.current);
+        echarts.registerTheme('chalk',chalk)
+        const mychart = echarts.init(trendRef.current,'chalk');
         setChartInstance(mychart);
         const initOption = {
             title: {
                 text: ''
+            },
+            grid:{
+                
             },
             xAxis: {
                 type: 'category',
@@ -84,7 +89,7 @@ export default function Trend() {
 
     return (
         <div className="com-container">
-            <div className="com-chart" ref={trendRef}>
+            <div className="com-chart"  id="a" ref={trendRef}>
 
             </div>
         </div>
