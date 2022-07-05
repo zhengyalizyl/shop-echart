@@ -1,0 +1,3 @@
+export const MAP_LIST_REQUEST = 'MAP_LIST_REQUEST';
+export const MAP_LIST_FAIL = 'MAP_LIST_FAIL';
+export const MAP_LIST_SUCCESS = 'MAP_LIST_SUCCESS';
