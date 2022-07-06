@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSeller } from '../actions/sellerActions';
-
+import './index.css'
 
 
 export default function Seller() {

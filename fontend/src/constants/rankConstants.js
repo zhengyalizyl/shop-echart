@@ -1,0 +1,3 @@
+export const RANK_LIST_REQUEST = 'RANK_LIST_REQUEST';
+export const RANK_LIST_FAIL = 'RANK_LIST_FAIL';
+export const RANK_LIST_SUCCESS = 'MAP_LIST_SUCCESS';

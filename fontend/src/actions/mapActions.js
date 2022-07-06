@@ -5,7 +5,7 @@ import { MAP_LIST_FAIL, MAP_LIST_REQUEST, MAP_LIST_SUCCESS } from "../constants/
 export const getMap = () => async(dispatch) => {
     try {
         dispatch({ type: MAP_LIST_REQUEST })
-        const data = await axios.get('http://localhost:3000/map/china.json');
+        const data = await axios.get('/api/map');
         dispatch({
             type: MAP_LIST_SUCCESS,
             payload: data
