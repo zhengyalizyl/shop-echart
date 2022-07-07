@@ -4,8 +4,8 @@ import App from './App';
 import './bootstrap.css'
 import {Provider} from 'react-redux'
 import store from './store';
-import './index.css'
 import './assets/font/iconfont.css'
+import './index.css'
 
 import setupAxios from './utils/setupAxios'
 setupAxios(store);

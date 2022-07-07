@@ -5,12 +5,14 @@ import { sellerReducer } from "./reducers/sellerReducer";
 import { trendReducer } from "./reducers/trendReducer";
 import { mapReducer } from "./reducers/mapReducer";
 import { rankReducer } from "./reducers/rankReducer";
+import { hotReducer } from "./reducers/hotReducer";
 
 const reducer = combineReducers({
     sellerData: sellerReducer,
     trendData: trendReducer,
     mapData: mapReducer,
-    rankData: rankReducer
+    rankData: rankReducer,
+    hotData: hotReducer
 })
 
 const initialState = {

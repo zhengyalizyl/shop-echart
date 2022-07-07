@@ -144,7 +144,6 @@ export default function Seller() {
     }
 
   const screenAdapter=()=>{
-      console.log(sellerRef.current)
       const titleFontSize=sellerRef.current.offsetWidth/100*3.6;
       const adapterOption={
         title:{

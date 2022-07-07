@@ -1,20 +1,27 @@
-import React,{useEffect,useRef,useState} from 'react';
-import { useSelector,useDispatch } from 'react-redux';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import * as echarts from 'echarts'
 import './index.css'
 import { getRank } from '../actions/rankActions';
 import chalk from '../utils/chalk'
 
 export default function Rank() {
-    const rankRef=useRef(null);
-    const dispatch=useDispatch();
-    const [chartInstance,setChartInstance]=useState(null);
-    const rankData=useSelector(state=>state.rankData);
-   const {loading,rankList}=rankData;
+    const rankRef = useRef(null);
+    const dispatch = useDispatch();
+    const [chartInstance, setChartInstance] = useState(null);
+    const rankData = useSelector(state => state.rankData);
+    const { loading, rankList } = rankData;
+    const [count, setCount] = useState(0);
+    const timerId = useRef(null);//定时器须得独一无二的
+
 
     useEffect(() => {
         initChart();
         geRankData();
+       
+        return () => {
+            clearInterval(timerId.current)
+        }
     }, [])
     useEffect(() => {
         screenAdapter();
@@ -24,58 +31,164 @@ export default function Rank() {
         }
     }, [chartInstance]);
 
-    useEffect(()=>{
+  
+
+    const getStartValue = useMemo(() => {
+        return count
+    }, [count])
+
+    const getEndVAlue = useMemo(() => {
+        return count + 9
+    }, [count])
+
+    useEffect(() => {
         updateChart();
-    },[rankList])
+        startInterval();
+    }, [rankList,count])
 
+    useEffect(() => {
+        if (chartInstance) {
+            chartInstance.on('mouseover', () => {
+                clearInterval(timerId.current)
+            })
+            chartInstance.on('mouseout', () => {
+                startInterval();
+            })
+        }
+    }, [chartInstance,count])
 
+    const startInterval = () => {
+        timerId.current && clearInterval(timerId.current);
+            timerId.current = setInterval(() => {
+                if(getEndVAlue>rankList.length-1){
+                   setCount(0)
+                }else{
+                    setCount(count + 1)
+                }
+            }, 2000)
+     
+    }
 
-    const initChart=()=>{
-        echarts.registerTheme('chalk', chalk)
-        const mychart=echarts.init(rankRef.current);
+    const initChart = () => {
+        echarts.registerTheme('chalk', chalk);
+        const mychart = echarts.init(rankRef.current, 'chalk');
         setChartInstance(mychart);
-        const initOption={
-          xAxis:{
-              type:'category'
-          },
-          yAxis:{
-              type:'value'
-          },
-          series:[{
-              type:'bar'
-          }]
+        const initOption = {
+            title: {
+                text: '| 地区销售排行',
+                left: 20,
+                top: 20
+            },
+            tooltip: {
+                show: true
+            },
+            dataZoom: {
+                show: false,
+                startValue: getStartValue,
+                endValue: getEndVAlue,
+            },
+            grid: {
+                top: '40%',
+                left: '5%',
+                right: '5%',
+                bottom: '5%',
+                containerLabel: true
+            },
+            xAxis: {
+                type: 'category',
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                type: 'bar'
+            }]
         };
         mychart.setOption(initOption);
     }
 
 
-    const updateChart=()=>{
-        if(rankList){
-            const updateOption={
-                xAxis:{
-                    data:rankList.map(item=>item.name)
+    const updateChart = () => {
+        const colorArr = [
+            ['#0BA82C', '#4FF778'],
+            ['#2E72BF', '#23E5E5'],
+            ['#5052EE', '#AB6EE5']
+        ]
+        if (rankList) {
+            const updateOption = {
+                xAxis: {
+                    data: rankList.map(item => item.name)
                 },
-                series:[{
-                    data:rankList.sort((a,b)=>b.value-a.value).map(item=>item.value)
+                dataZoom: {
+                    startValue: getStartValue,
+                    endValue: getEndVAlue,
+                },
+                series: [{
+                    data: rankList.sort((a, b) => b.value - a.value).map(item => item.value),
+                    itemStyle: {
+                        color: (item) => {
+                            let targetColorArr = null
+                            if (item.value > 300) {
+                                targetColorArr = colorArr[0]
+                            } else if (item.value > 200) {
+                                targetColorArr = colorArr[1]
+                            } else {
+                                targetColorArr = colorArr[2]
+                            }
+                            return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                {
+                                    offset: 0,
+                                    color: targetColorArr[0]
+                                },
+                                {
+                                    offset: 1,
+                                    color: targetColorArr[1]
+                                }
+                            ])
+                        }
+                    }
                 }]
-              };
-              chartInstance&&chartInstance.setOption(updateOption);
+            };
+            chartInstance && chartInstance.setOption(updateOption);
         }
-     
+
 
     }
-    const screenAdapter=()=>{
-        const screenOption={};
-        chartInstance&&chartInstance.setOption(screenOption)
+    const screenAdapter = () => {
+        const titleFontSize=rankRef.current.offsetWidth/100*3.6;
+        console.log(titleFontSize)
+        const screenOption = {
+            title:{
+                textStyle:{
+                    fontSize:titleFontSize
+                },
+            },
+            tooltip:{
+                axisPointer:{
+                    lineStyle:{
+                        width:titleFontSize,
+                    }
+                }
+            },
+            series: [{
+                barWidth:titleFontSize,
+                itemStyle:{
+                    barBorderRadius:[titleFontSize/2,titleFontSize/2,0,0]
+
+                }
+            }]
+        };
+        chartInstance && chartInstance.setOption(screenOption);
+        chartInstance && chartInstance.resize();
     }
 
-    const geRankData=()=>{
-         dispatch(getRank());
+    const geRankData = () => {
+        dispatch(getRank());
     }
-    
-  return (
-    <div className='com-container' >
-    <div className="com-chart" ref={rankRef}></div>
-</div>
-  )
+
+    return (
+        <div className='com-container' >
+            <div className="com-chart" ref={rankRef}></div>
+        </div>
+    )
 }

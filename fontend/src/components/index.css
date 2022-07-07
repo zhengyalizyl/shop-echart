@@ -14,3 +14,28 @@
 .select-con {
     background-color: #222733;
 }
+
+.arr-left {
+    position: absolute;
+    left: 10%;
+    top: 50%;
+    transform: translateY(-50%) !important;
+    cursor: pointer;
+    color: white;
+}
+
+.arr-right {
+    position: absolute;
+    right: 10%;
+    top: 50%;
+    transform: translateY(-50%) !important;
+    cursor: pointer;
+    color: white;
+}
+
+.cat-name {
+    position: absolute;
+    left: 80%;
+    bottom: 20px;
+    color: white;
+}
