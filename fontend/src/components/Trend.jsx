@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTrend } from '../actions/trendActions';
 import chalk from '../utils/chalk'
 import './index.css'
+import SocketService from '../utils/socket_service';
 
 export default function Trend() {
     const trendRef = useRef(null);
@@ -18,8 +19,21 @@ export default function Trend() {
 
     useEffect(() => {
         initChart();
-        getTrendData();
+
     }, [])
+    useEffect(() => {
+        getTrendData();
+        SocketService.Instance.send({
+            action: 'getData',
+            socketType: 'trendData',
+            chartName: 'trend',
+            value: ''
+        })
+        return () => {
+            SocketService.Instance.unRegisterCallBack('trendData')
+        }
+    }, [])
+
     useEffect(() => {
         screenAdapter();
         window.addEventListener('resize', screenAdapter);
@@ -36,7 +50,7 @@ export default function Trend() {
         } else {
             setSelectTypes([])
         }
-    }, [chartInstance, trendList,choiceType])
+    }, [chartInstance, trendList, choiceType])
 
     const initChart = () => {
         echarts.registerTheme('chalk', chalk)
@@ -130,17 +144,17 @@ export default function Trend() {
     }
 
     const screenAdapter = () => {
-       const  fontSize = trendRef.current.offsetWidth / 100 * 3.6;
-       setTitleFontSize(fontSize);
+        const fontSize = trendRef.current.offsetWidth / 100 * 3.6;
+        setTitleFontSize(fontSize);
         const adapterOption = {
             legend: {
                 itemWidth: fontSize,
                 itemHeight: fontSize,
                 itemGap: fontSize,
                 textStyle: {
-                  fontSize: fontSize / 2
+                    fontSize: fontSize / 2
                 }
-              }
+            }
         };
         chartInstance && chartInstance.setOption(adapterOption);
         chartInstance && chartInstance.resize();

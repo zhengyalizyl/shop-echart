@@ -6,6 +6,7 @@ import { getMap } from '../actions/mapActions';
 import axios from 'axios';
 import { getProvinceMapInfo } from '../utils/map_utils'; 
 import './index.css'
+import SocketService from '../utils/socket_service';
 
 export default function Map() {
     const mapRef = useRef(null);
@@ -18,8 +19,23 @@ export default function Map() {
 
     useEffect(() => {
         initChart();
-        getMapData();
+       
     }, [])
+
+
+    useEffect(() => {
+        getMapData();
+        SocketService.Instance.send({
+            action: 'getData',
+            socketType: 'mapData',
+            chartName: 'map',
+            value: ''
+        })
+        return () => {
+            SocketService.Instance.unRegisterCallBack('mapData')
+        }
+    }, [])
+  
     useEffect(() => {
         screenAdapter();
         window.addEventListener('resize', screenAdapter);

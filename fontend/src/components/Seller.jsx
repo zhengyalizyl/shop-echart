@@ -3,7 +3,7 @@ import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSeller } from '../actions/sellerActions';
 import './index.css'
-
+import SocketService from '../utils/socket_service';
 
 export default function Seller() {
     const [chartInstance, setChartInstance] = useState(null);
@@ -16,11 +16,23 @@ export default function Seller() {
     const sellerRef = useRef(null)
     useEffect(() => {
         initChart();
-        getData();
         return () => {
             clearInterval(timerId.current)
         }
     }, []);
+
+    useEffect(() => {
+        getData();
+        SocketService.Instance.send({
+            action: 'getData',
+            socketType: 'sellerData',
+            chartName: 'seller',
+            value: ''
+        })
+        return () => {
+            SocketService.Instance.unRegisterCallBack('sellerData')
+        }
+    }, [])
 
     useEffect(()=>{
         screenAdapter();

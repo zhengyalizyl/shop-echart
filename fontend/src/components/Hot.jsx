@@ -4,6 +4,7 @@ import { getHot } from '../actions/hotActions';
 import * as echarts from 'echarts';
 import chalk from '../utils/chalk';
 import './index.css'
+import SocketService from '../utils/socket_service';
 
 export default function Hot() {
     const hotRef = useRef(null);
@@ -14,9 +15,22 @@ export default function Hot() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [titleFontSize, setTitleFontSize] = useState(0);
     useEffect(() => {
-        getData();
         initChart();
     }, []);
+
+  
+    useEffect(() => {
+        getData();
+        SocketService.Instance.send({
+            action: 'getData',
+            socketType: 'hotproductData',
+            chartName: 'hotproduct',
+            value: ''
+        })
+        return () => {
+            SocketService.Instance.unRegisterCallBack('hotproductData')
+        }
+    }, [])
 
     useEffect(() => {
         updateChart();
@@ -26,6 +40,8 @@ export default function Hot() {
             window.removeEventListener('resize', screenAdapter)
         }
     }, [chartInstance, hotList, currentIndex])
+
+
 
     const initChart = () => {
         echarts.registerTheme('chalk', chalk)

@@ -4,6 +4,7 @@ import * as echarts from 'echarts'
 import './index.css'
 import { getRank } from '../actions/rankActions';
 import chalk from '../utils/chalk'
+import SocketService from '../utils/socket_service';
 
 export default function Rank() {
     const rankRef = useRef(null);
@@ -17,7 +18,7 @@ export default function Rank() {
 
     useEffect(() => {
         initChart();
-        geRankData();
+       
        
         return () => {
             clearInterval(timerId.current)
@@ -30,7 +31,18 @@ export default function Rank() {
             window.removeEventListener('resize', screenAdapter)
         }
     }, [chartInstance]);
-
+    useEffect(() => {
+        geRankData();
+        SocketService.Instance.send({
+            action: 'getData',
+            socketType: 'rankData',
+            chartName: 'rank',
+            value: ''
+        })
+        return () => {
+            SocketService.Instance.unRegisterCallBack('rankData')
+        }
+    }, [])
   
 
     const getStartValue = useMemo(() => {

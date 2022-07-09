@@ -4,6 +4,7 @@ import { getStock } from '../actions/stockActions';
 import * as echarts from 'echarts';
 import chalk from '../utils/chalk';
 import './index.css'
+import SocketService from '../utils/socket_service';
 
 export default function Stock() {
     const stockRef = useRef(null);
@@ -15,12 +16,25 @@ export default function Stock() {
     const [titleFontSize, setTitleFontSize] = useState(0);
     const timerId = useRef(null)
     useEffect(() => {
-        getData();
+      
         initChart();
         return () => {
             clearInterval(timerId)
         }
     }, []);
+
+    useEffect(() => {
+        getData();
+        SocketService.Instance.send({
+            action: 'getData',
+            socketType: 'stockData',
+            chartName: 'stock',
+            value: ''
+        })
+        return () => {
+            SocketService.Instance.unRegisterCallBack('stockData')
+        }
+    }, [])
 
     useEffect(() => {
         startInterval();
@@ -68,7 +82,8 @@ export default function Stock() {
             },
             legend: {
                 top: '10%',
-                icon: 'circle'
+                icon: 'circle',
+                orient:'horizontal'
             },
             tooptip: {
                 show: true
@@ -164,7 +179,8 @@ export default function Stock() {
         setTitleFontSize(titleFontSize)
         const screenOption = {
             legend: {
-                temWidth: titleFontSize / 2,
+                orient:'horizontal',
+                itemWidth: titleFontSize / 2,
                 itemHeight: titleFontSize / 2,
                 itemGap: titleFontSize / 2,
                 textStyle: {
