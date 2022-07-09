@@ -15,3 +15,7 @@ const respDataMiddleware = require('./middleware/koa_response_data')
 app.use(respDataMiddleware)
 
 app.listen(8080)
+
+const webSocketService = require('./service/web_socket_service');
+console.log(webSocketService);
+webSocketService.listen();

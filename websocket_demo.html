@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button id="connect">连接</button>
+    <button id="send" disabled="true">发送数据</button> <br> 从服务端接受的数据如下:
+    <br>
+    <span id="rec"></span>
+    <script>
+        const connect = document.querySelector('#connect');
+        const send = document.querySelector('#send');
+        const recv = document.querySelector('#recv');
+        let ws = null;
+        connect.onclick = function() {
+            ws = new WebSocket('ws://localhost:9998');
+            ws.onopen = () => {
+                send.disabled = false
+                console.log('连接服务器成功')
+            }
+            ws.onclose = () => {
+                send.disabled = true
+                console.log('连接服务器失败')
+            }
+            ws.onmessage = (msg) => {
+                console.log('recevied message', msg)
+            }
+        }
+        send.onclick = function() {
+            ws.send('hello socket from backend')
+        }
+    </script>
+
+</body>
+
+</html>
