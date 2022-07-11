@@ -1,36 +1,46 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useImperativeHandle,forwardRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as echarts from 'echarts'
 import './index.css'
 import { getRank } from '../actions/rankActions';
 import chalk from '../utils/chalk'
 import SocketService from '../utils/socket_service';
+import vintage from '../utils/vintage';
 
-export default function Rank() {
-    const rankRef = useRef(null);
+const Rank = forwardRef((_, ref) => {
+    const rankRef = useRef(ref);
+    // const rankRef = ref;
     const dispatch = useDispatch();
     const [chartInstance, setChartInstance] = useState(null);
     const rankData = useSelector(state => state.rankData);
     const { loading, rankList } = rankData;
     const [count, setCount] = useState(0);
     const timerId = useRef(null);//定时器须得独一无二的
-
-
+    const themeData=useSelector(state=>state.themeData);
     useEffect(() => {
-        initChart();
-       
-       
-        return () => {
-            clearInterval(timerId.current)
-        }
-    }, [])
+        chartInstance&&chartInstance.dispose()
+       initChart();
+       return () => {
+        clearInterval(timerId.current)
+    }
+    },[themeData]);
+
     useEffect(() => {
         screenAdapter();
         window.addEventListener('resize', screenAdapter);
+
         return () => {
             window.removeEventListener('resize', screenAdapter)
         }
     }, [chartInstance]);
+
+
+    useImperativeHandle(ref, () => ({
+        screenAdapt: () => {
+            screenAdapter();
+        }
+    }));
+
     useEffect(() => {
         geRankData();
         SocketService.Instance.send({
@@ -43,7 +53,7 @@ export default function Rank() {
             SocketService.Instance.unRegisterCallBack('rankData')
         }
     }, [])
-  
+
 
     const getStartValue = useMemo(() => {
         return count
@@ -56,7 +66,7 @@ export default function Rank() {
     useEffect(() => {
         updateChart();
         startInterval();
-    }, [rankList,count])
+    }, [rankList, count,chartInstance])
 
     useEffect(() => {
         if (chartInstance) {
@@ -67,22 +77,24 @@ export default function Rank() {
                 startInterval();
             })
         }
-    }, [chartInstance,count])
+    }, [chartInstance, count])
 
     const startInterval = () => {
         timerId.current && clearInterval(timerId.current);
-            timerId.current = setInterval(() => {
-                if(getEndVAlue>rankList.length-1){
-                   setCount(0)
-                }else{
-                    setCount(count + 1)
-                }
-            }, 2000)
-     
+        timerId.current = setInterval(() => {
+            if (getEndVAlue > rankList.length - 1) {
+                setCount(0)
+            } else {
+                setCount(count + 1)
+            }
+        }, 2000)
+
     }
 
     const initChart = () => {
-        echarts.registerTheme('chalk', chalk);
+        console.log(themeData)
+        const  themeColor=themeData==='chalk'?chalk:vintage;
+        echarts.registerTheme('chalk', themeColor)
         const mychart = echarts.init(rankRef.current, 'chalk');
         setChartInstance(mychart);
         const initOption = {
@@ -167,25 +179,24 @@ export default function Rank() {
 
     }
     const screenAdapter = () => {
-        const titleFontSize=rankRef.current.offsetWidth/100*3.6;
-        console.log(titleFontSize)
+        const titleFontSize = rankRef.current.offsetWidth / 100 * 3.6;
         const screenOption = {
-            title:{
-                textStyle:{
-                    fontSize:titleFontSize
+            title: {
+                textStyle: {
+                    fontSize: titleFontSize
                 },
             },
-            tooltip:{
-                axisPointer:{
-                    lineStyle:{
-                        width:titleFontSize,
+            tooltip: {
+                axisPointer: {
+                    lineStyle: {
+                        width: titleFontSize,
                     }
                 }
             },
             series: [{
-                barWidth:titleFontSize,
-                itemStyle:{
-                    barBorderRadius:[titleFontSize/2,titleFontSize/2,0,0]
+                barWidth: titleFontSize,
+                itemStyle: {
+                    barBorderRadius: [titleFontSize / 2, titleFontSize / 2, 0, 0]
 
                 }
             }]
@@ -203,4 +214,6 @@ export default function Rank() {
             <div className="com-chart" ref={rankRef}></div>
         </div>
     )
-}
+})
+
+export default Rank;

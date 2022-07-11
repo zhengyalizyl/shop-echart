@@ -1,9 +1,10 @@
-.title {
+.rank.title {
     position: absolute;
     left: 20px;
     top: 20px;
     z-index: 10;
     color: white;
+    transform: translate(0, 0);
 }
 
 .title-icon {
@@ -13,6 +14,10 @@
 
 .select-con {
     background-color: #222733;
+}
+
+.selec-con_fff {
+    background-color: #fff;
 }
 
 .arr-left {

@@ -1,13 +1,16 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTrend } from '../actions/trendActions';
 import chalk from '../utils/chalk'
 import './index.css'
 import SocketService from '../utils/socket_service';
+import vintage from '../utils/vintage';
+import { getThemeValue } from '../utils/theme_utils';
 
-export default function Trend() {
-    const trendRef = useRef(null);
+const Trend = forwardRef((_, ref) => {
+    // const trendRef = useRef(null);
+    const trendRef = useRef(ref);
     const dispatch = useDispatch();
     const [chartInstance, setChartInstance] = useState(null);
     const trendData = useSelector(state => state.trendData);
@@ -16,10 +19,15 @@ export default function Trend() {
     const [showChoice, setShowChoice] = useState(false);
     const [selectTypes, setSelectTypes] = useState([]);
     const [choiceType, setChoiceType] = useState('map')
+    const themeData=useSelector(state=>state.themeData);
+    useEffect(() => {
+        chartInstance&&chartInstance.dispose()
+       initChart();
+
+    },[themeData]);
 
     useEffect(() => {
         initChart();
-
     }, [])
     useEffect(() => {
         getTrendData();
@@ -34,9 +42,17 @@ export default function Trend() {
         }
     }, [])
 
+
+    useImperativeHandle(ref, () => ({
+        screenAdapt: () => {
+            screenAdapter();
+        }
+    }));
+
     useEffect(() => {
         screenAdapter();
         window.addEventListener('resize', screenAdapter);
+
         return () => {
             window.removeEventListener('resize', screenAdapter)
         }
@@ -53,7 +69,8 @@ export default function Trend() {
     }, [chartInstance, trendList, choiceType])
 
     const initChart = () => {
-        echarts.registerTheme('chalk', chalk)
+        const  themeColor=themeData==='chalk'?chalk:vintage;
+        echarts.registerTheme('chalk', themeColor)
         const mychart = echarts.init(trendRef.current, 'chalk');
         setChartInstance(mychart);
         const initOption = {
@@ -158,7 +175,6 @@ export default function Trend() {
         };
         chartInstance && chartInstance.setOption(adapterOption);
         chartInstance && chartInstance.resize();
-
     }
 
     const handleSelect = (type) => {
@@ -166,15 +182,24 @@ export default function Trend() {
         setChoiceType(type);
         updateTrendData();
     }
+
+      
+    const comStyle=useMemo(()=>{
+        return {
+            fontSize:titleFontSize,
+            color:getThemeValue(themeData).titleColor
+        }
+    },[titleFontSize,themeData])
+
     return (
         <div className="com-container">
-            <div className="title" style={{ fontSize: titleFontSize }}>
+            <div className="title rank" style={comStyle}>
                 <span>{'|' + (trendList ? trendList[choiceType].title : '')}</span>
                 <span className="iconfont title-icon" style={{ fontSize: titleFontSize }} onClick={() => setShowChoice(!showChoice)}>&#xe6eb;</span>
-                {showChoice && (<div className='select-con' style={{ marginLeft: titleFontSize }}>
+                {showChoice && (<div className={`${themeData==='vintage'?'selec-con_fff':'select-con'}`} style={{ marginLeft: titleFontSize}}>
                     {
                         selectTypes.map(item => (
-                            <div key={item.key} class="select-item" onClick={() => handleSelect(item.key)}>
+                            <div key={item.key} class="select-item"  onClick={() => handleSelect(item.key)}>
                                 {item.text}
                             </div>
                         ))
@@ -185,4 +210,6 @@ export default function Trend() {
             </div>
         </div >
     )
-}
+})
+
+export default Trend

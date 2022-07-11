@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getStock } from '../actions/stockActions';
 import * as echarts from 'echarts';
 import chalk from '../utils/chalk';
 import './index.css'
 import SocketService from '../utils/socket_service';
+import vintage from '../utils/vintage';
 
-export default function Stock() {
-    const stockRef = useRef(null);
+const Stock = forwardRef((_, ref) => {
+    const stockRef = useRef(ref);
     const dispatch = useDispatch();
     const [chartInstance, setChartInstance] = useState(null);
     const stockData = useSelector(state => state.stockData);
@@ -15,13 +16,21 @@ export default function Stock() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [titleFontSize, setTitleFontSize] = useState(0);
     const timerId = useRef(null)
+    const themeData=useSelector(state=>state.themeData);
+
     useEffect(() => {
-      
-        initChart();
-        return () => {
-            clearInterval(timerId)
+        chartInstance&&chartInstance.dispose()
+       initChart();
+       return () => {
+        clearInterval(timerId.current)
+    }
+    },[themeData]);
+
+    useImperativeHandle(ref, () => ({
+        screenAdapt: () => {
+            screenAdapter();
         }
-    }, []);
+    }));
 
     useEffect(() => {
         getData();
@@ -41,12 +50,13 @@ export default function Stock() {
         updateChart();
         screenAdapter();
         window.addEventListener('resize', screenAdapter);
+
         return () => {
             window.removeEventListener('resize', screenAdapter)
         }
     }, [chartInstance, stockList, currentIndex])
 
-    useEffect(()=>{
+    useEffect(() => {
         if (chartInstance) {
             chartInstance.on('mouseover', () => {
                 clearInterval(timerId.current)
@@ -55,7 +65,7 @@ export default function Stock() {
                 startInterval();
             })
         }
-    },[chartInstance,currentIndex])
+    }, [chartInstance, currentIndex])
 
     const startInterval = () => {
         if (timerId.current) {
@@ -68,10 +78,11 @@ export default function Stock() {
 
     }
 
-    
+
 
     const initChart = () => {
-        echarts.registerTheme('chalk', chalk)
+        const  themeColor=themeData==='chalk'?chalk:vintage;
+        echarts.registerTheme('chalk', themeColor)
         const mychart = echarts.init(stockRef.current, 'chalk');
         setChartInstance(mychart);
         const options = {
@@ -83,7 +94,7 @@ export default function Stock() {
             legend: {
                 top: '10%',
                 icon: 'circle',
-                orient:'horizontal'
+                orient: 'horizontal'
             },
             tooptip: {
                 show: true
@@ -130,21 +141,21 @@ export default function Stock() {
                     radius: [110, 100],
                     hoverAnimation: false, // 关闭鼠标移入到饼图时的动画效果
                     labelLine: {
-                      show: false // 隐藏指示线
+                        show: false // 隐藏指示线
                     },
                     center: centerArr[index],
                     data: [{
                         name: item.name + '\n' + item.sales,
                         value: item.sales,
-                        itemStyle:{
-                            color:new echarts.graphic.LinearGradient(0,1,0,0,[
+                        itemStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [
                                 {
-                                    offset:0,
-                                    color:colorArr[index][0]
+                                    offset: 0,
+                                    color: colorArr[index][0]
                                 },
                                 {
-                                    offset:1,
-                                    color:colorArr[index][1]
+                                    offset: 1,
+                                    color: colorArr[index][1]
                                 }
                             ])
                         }
@@ -179,7 +190,7 @@ export default function Stock() {
         setTitleFontSize(titleFontSize)
         const screenOption = {
             legend: {
-                orient:'horizontal',
+                orient: 'horizontal',
                 itemWidth: titleFontSize / 2,
                 itemHeight: titleFontSize / 2,
                 itemGap: titleFontSize / 2,
@@ -246,4 +257,7 @@ export default function Stock() {
             <div className="com-chart" ref={stockRef}></div>
         </div>
     )
-}
+})
+
+
+export default Stock

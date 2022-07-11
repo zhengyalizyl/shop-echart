@@ -52,6 +52,7 @@ class SocketService {
             console.log('从服务端获取到了数据')
                 // 真正服务端发送过来的原始数据时在msg中的data字段
             const recvData = JSON.parse(msg.data);
+            console.log(msg, recvData)
             const socketType = recvData.socketType;
             console.log(this.callBackMapping[socketType])
             if (this.callBackMapping[socketType]) {

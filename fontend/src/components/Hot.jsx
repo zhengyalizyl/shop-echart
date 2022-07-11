@@ -1,23 +1,34 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo,forwardRef,useImperativeHandle } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getHot } from '../actions/hotActions';
 import * as echarts from 'echarts';
 import chalk from '../utils/chalk';
+import vintage from '../utils/vintage';
 import './index.css'
 import SocketService from '../utils/socket_service';
+import { getThemeValue } from '../utils/theme_utils';
 
-export default function Hot() {
-    const hotRef = useRef(null);
+const  Hot=forwardRef((_,ref)=> {
+    const hotRef = useRef(ref);
     const dispatch = useDispatch();
     const [chartInstance, setChartInstance] = useState(null);
     const hotData = useSelector(state => state.hotData);
     const { loading, hotList } = hotData;
     const [currentIndex, setCurrentIndex] = useState(0);
     const [titleFontSize, setTitleFontSize] = useState(0);
+    const themeData=useSelector(state=>state.themeData);
     useEffect(() => {
-        initChart();
-    }, []);
+        chartInstance&&chartInstance.dispose()
+       initChart();
 
+    },[themeData]);
+
+
+    useImperativeHandle(ref,()=>({
+        screenAdapt:()=>{
+            screenAdapter();
+        }
+      }));
   
     useEffect(() => {
         getData();
@@ -33,9 +44,9 @@ export default function Hot() {
     }, [])
 
     useEffect(() => {
-        updateChart();
-        screenAdapter();
-        window.addEventListener('resize', screenAdapter);
+            updateChart();
+            screenAdapter();
+            window.addEventListener('resize', screenAdapter);
         return () => {
             window.removeEventListener('resize', screenAdapter)
         }
@@ -44,7 +55,8 @@ export default function Hot() {
 
 
     const initChart = () => {
-        echarts.registerTheme('chalk', chalk)
+       const  themeColor=themeData==='chalk'?chalk:vintage;
+        echarts.registerTheme('chalk', themeColor)
         const mychart = echarts.init(hotRef.current, 'chalk');
         setChartInstance(mychart);
         const options = {
@@ -98,7 +110,6 @@ export default function Hot() {
                         const thirdCategory = arg.data.children
                         // 计算出所有三级分类的数值总和
                         const total = thirdCategory.reduce((pre, next) => pre + next.value, 0)
-                        console.log(total)
                         let retStr = ''
                         thirdCategory.forEach(item => {
                             retStr += `
@@ -173,12 +184,21 @@ export default function Hot() {
         chartInstance && chartInstance.setOption(screenOption);
         chartInstance && chartInstance.resize();
     }
+  const comStyle=useMemo(()=>{
+      return {
+          fontSize:titleFontSize,
+          color:getThemeValue(themeData).titleColor
+      }
+  },[titleFontSize,themeData])
+
     return (
         <div className='com-container'  >
             <div className="com-chart" ref={hotRef}></div>
-            <span className="iconfont arr-left" style={{ fontSize: titleFontSize }} onClick={toLeft}>&#xe6ef;</span>
-            <span className="iconfont arr-right" style={{ fontSize: titleFontSize }} onClick={toRight}>&#xe6ed;</span>
-            <span className="cat-name" style={{ fontSize: titleFontSize }}>{hotList && hotList[currentIndex].name}</span>
+            <span className="iconfont arr-left" style={comStyle} onClick={toLeft}>&#xe6ef;</span>
+            <span className="iconfont arr-right" style={comStyle} onClick={toRight}>&#xe6ed;</span>
+            <span className="cat-name" style={comStyle}>{hotList && hotList[currentIndex].name}</span>
         </div>
     )
-}
+})
+
+export default Hot

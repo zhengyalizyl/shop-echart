@@ -30,7 +30,8 @@ const listen = () => {
                 // wss.clients // 所有客户端的连接
                 wss.clients.forEach(client => {
                     // console.log(wss.clients)
-                    client.send(msg)
+                    // client.send(msg)
+                    client.send(JSON.stringify(JSON.parse(msg)))
                 });
             }
             // client.send('hello socket')

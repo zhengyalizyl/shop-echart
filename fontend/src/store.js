@@ -7,6 +7,7 @@ import { mapReducer } from "./reducers/mapReducer";
 import { rankReducer } from "./reducers/rankReducer";
 import { hotReducer } from "./reducers/hotReducer";
 import { stockReducer } from "./reducers/stockReducer";
+import { themeReducer } from "./reducers/themeReducer";
 
 const reducer = combineReducers({
     sellerData: sellerReducer,
@@ -14,11 +15,12 @@ const reducer = combineReducers({
     mapData: mapReducer,
     rankData: rankReducer,
     hotData: hotReducer,
-    stockData: stockReducer
+    stockData: stockReducer,
+    themeData: themeReducer
 })
 
 const initialState = {
-
+    themeData: 'chalk'
 };
 
 

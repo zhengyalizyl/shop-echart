@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import * as echarts from 'echarts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSeller } from '../actions/sellerActions';
 import './index.css'
 import SocketService from '../utils/socket_service';
+import chalk from '../utils/chalk';
+import vintage from '../utils/vintage';
 
-export default function Seller() {
+const Seller = forwardRef((_, ref) => {
+    const sellerRef = useRef(ref)
     const [chartInstance, setChartInstance] = useState(null);
     const dispatch = useDispatch();
     const sellerData = useSelector(state => state.sellerData);
@@ -13,13 +16,20 @@ export default function Seller() {
     const [current, setCurrent] = useState(1);
     const [totalPage, setTotalPage] = useState(0);
     const timerId = useRef(null);//定时器须得独一无二的
-    const sellerRef = useRef(null)
+    const themeData=useSelector(state=>state.themeData);
     useEffect(() => {
-        initChart();
-        return () => {
-            clearInterval(timerId.current)
+        chartInstance&&chartInstance.dispose()
+       initChart();
+       return () => {
+        clearInterval(timerId.current)
+    }
+    },[themeData]);
+
+    useImperativeHandle(ref, () => ({
+        screenAdapt: () => {
+            screenAdapter();
         }
-    }, []);
+    }));
 
     useEffect(() => {
         getData();
@@ -34,67 +44,69 @@ export default function Seller() {
         }
     }, [])
 
-    useEffect(()=>{
+    useEffect(() => {
         screenAdapter();
-        window.addEventListener('resize',screenAdapter);
-        return ()=>{
-            window.removeEventListener('resize',screenAdapter)
+        window.addEventListener('resize', screenAdapter);
+        return () => {
+            window.removeEventListener('resize', screenAdapter)
         }
-    },[chartInstance])
+    }, [chartInstance])
     const initChart = () => {
-        const sellChart = echarts.init(sellerRef.current);
+        const  themeColor=themeData==='chalk'?chalk:vintage;
+        echarts.registerTheme('chalk', themeColor)
+        const sellChart = echarts.init(sellerRef.current,'chalk');
         setChartInstance(sellChart);
         const initOption = {
-            title:{
-                text:'商家销售统计',
-                textStyle:{
-                    fontSize:66
+            title: {
+                text: '| 商家销售统计',
+                textStyle: {
+                    fontSize: 66
                 },
-                left:20,
-                top:20
+                left: 20,
+                top: 20
             },
             xAxis: {
                 type: 'value',
             },
-            grid:{
-                top:'20%',
-                left:'3%',
-                right:'6%',
-                bottom:'3%',
-                containLabel:true
+            grid: {
+                top: '20%',
+                left: '3%',
+                right: '6%',
+                bottom: '3%',
+                containLabel: true
             },
             yAxis: {
                 type: 'category',
             },
-            tooltip:{
-                trigger:'axis',
-                axisPointer:{
-                    type:'line',
-                    lineStyle:{
-                        width:66,
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'line',
+                    lineStyle: {
+                        width: 66,
                         color: 'rgba(180, 180, 180, 0.2)'
                     }
                 }
             },
             series: [{
                 type: 'bar',
-                barWidth:66,
-                label:{
-                    show:true,
-                    position:'right',
-                    textStyle:{
-                        color:'white'
+                barWidth: 66,
+                label: {
+                    show: true,
+                    position: 'right',
+                    textStyle: {
+                        color: 'white'
                     }
                 },
-                itemStyle:{
-                    barBorderRadius:[0,33,33,0],
-                    color:new echarts.graphic.LinearGradient(
-                        0,0,1,0,[{
-                            offset:0,
-                            color:'#5052ee'
-                        },{
-                            offset:1,
-                            color:'#ab6ee5'
+                itemStyle: {
+                    barBorderRadius: [0, 33, 33, 0],
+                    color: new echarts.graphic.LinearGradient(
+                        0, 0, 1, 0, [{
+                            offset: 0,
+                            color: '#5052ee'
+                        }, {
+                            offset: 1,
+                            color: '#ab6ee5'
                         }]
                     )
                 }
@@ -155,31 +167,31 @@ export default function Seller() {
         }, 3000);
     }
 
-  const screenAdapter=()=>{
-      const titleFontSize=sellerRef.current.offsetWidth/100*3.6;
-      const adapterOption={
-        title:{
-            textStyle:{
-                fontSize:titleFontSize
+    const screenAdapter = () => {
+        const titleFontSize = sellerRef.current.offsetWidth / 100 * 3.6;
+        const adapterOption = {
+            title: {
+                textStyle: {
+                    fontSize: titleFontSize
+                },
             },
-        },
-        tooltip:{
-            axisPointer:{
-                lineStyle:{
-                    width:titleFontSize,
+            tooltip: {
+                axisPointer: {
+                    lineStyle: {
+                        width: titleFontSize,
+                    }
                 }
-            }
-        },
-        series: [{
-            barWidth:titleFontSize,
-            itemStyle:{
-                barBorderRadius:[0,titleFontSize/2,titleFontSize/2,0]
-            }
-        }]
+            },
+            series: [{
+                barWidth: titleFontSize,
+                itemStyle: {
+                    barBorderRadius: [0, titleFontSize / 2, titleFontSize / 2, 0]
+                }
+            }]
+        }
+        chartInstance && chartInstance.setOption(adapterOption);
+        chartInstance && chartInstance.resize();
     }
-    chartInstance&& chartInstance.setOption(adapterOption);
-    chartInstance&&chartInstance.resize();
-  }
 
 
     return (
@@ -187,4 +199,6 @@ export default function Seller() {
             <div className="com-chart" ref={sellerRef}></div>
         </div>
     )
-}
+})
+
+export default Seller;
